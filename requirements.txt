@@ -1,0 +1,4 @@
+# 当前脚本仅依赖 Python 标准库。如果计划使用 pyautogui 替代 cliclick，可取消下面一行的注释并安装。
+pyautogui>=0.9.54
+selenium>=4.20.0
+webdriver-manager>=4.0.1 
