@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+    <title>테스트 페이지 - 참여 신청</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-button {
+            width: 100%;
+            padding: 20px;
+            font-size: 18px;
+            background-color: #00c73c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+
+        .main-button:hover {
+            background-color: #00b33a;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .checkbox-group {
+            margin: 20px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #00c73c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .submit-button:hover {
+            background-color: #00b33a;
+        }
+
+        .title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .info {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: #0066cc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 首页 -->
+        <div id="main-page">
+            <h1 class="title">이벤트 참여 신청</h1>
+            <div class="info">
+                🎉 특별 이벤트에 참여하세요!<br>
+                아래 버튼을 클릭하여 신청서를 작성해주세요.
+            </div>
+            <button class="main-button" onclick="showForm()">
+                참여 신청하기
+            </button>
+        </div>
+
+        <!-- 표단 페이지 -->
+        <div id="form-page" class="form-container">
+            <h1 class="title">참여 신청서</h1>
+            <div class="info">
+                📝 모든 필수 정보를 입력해주세요.
+            </div>
+
+            <form id="application-form" onsubmit="submitForm(event)">
+                <div class="form-group">
+                    <label for="name">이름 *</label>
+                    <input type="text" id="name" name="name"
+                        value="홍길동" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="birth">생년월일 * (YYYYMMDD)</label>
+                    <input type="text" id="birth" name="birth"
+                        placeholder="생년월일을 입력하세요 (예: 19900101)"
+                        maxlength="8" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">연락처</label>
+                    <input type="tel" id="phone" name="phone"
+                        value="010-1234-5678" readonly>
+                </div>
+
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agree1"
+                            name="agree1" required>
+                        <label for="agree1">개인정보 수집 및 이용에 동의합니다.
+                            (필수)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agree2"
+                            name="agree2" required>
+                        <label for="agree2">이벤트 참여 약관에 동의합니다.
+                            (필수)</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button">
+                    참여 신청
+                </button>
+            </form>
+        </div>
+
+        <!-- 결과 페이지 -->
+        <div id="result-page" class="form-container">
+            <h1 class="title">신청 완료!</h1>
+            <div class="info">
+                ✅ 참여 신청이 성공적으로 완료되었습니다.<br>
+                감사합니다!
+            </div>
+            <div id="form-data"></div>
+        </div>
+    </div>
+
+    <script>
+        function showForm() {
+            console.log('🔄 표단 페이지로 이동 중...');
+            document.getElementById('main-page').style.display =
+                'none';
+            document.getElementById('form-page').style.display =
+                'block';
+
+            // 페이지 변경을 시뮬레이션하기 위해 URL 변경
+            window.history.pushState({}, '', '?page=form');
+
+            // 표단이 로드되었음을 알리는 이벤트
+            setTimeout(() => {
+                console.log('✅ 표단 페이지 로드 완료');
+                // 표단 로드 완료 이벤트 발생
+                document.dispatchEvent(new CustomEvent(
+                    'formPageLoaded'));
+            }, 100);
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+
+            console.log('🚀 표단 제출 시작...');
+
+            // 표단 데이터 수집
+            const formData = new FormData(event.target);
+            const data = {
+                name: formData.get('name'),
+                birth: formData.get('birth'),
+                phone: formData.get('phone'),
+                agree1: formData.get('agree1') ? true : false,
+                agree2: formData.get('agree2') ? true : false,
+                timestamp: new Date().toISOString()
+            };
+
+            console.log('📊 표단 데이터:', data);
+
+            // 가짜 API 요청 시뮬레이션
+            setTimeout(() => {
+                // POST 요청 시뮬레이션
+                console.log(
+                    '📡 POST /api/submit - 신청 데이터 전송');
+
+                // GET 요청 시뮬레이션
+                setTimeout(() => {
+                    console.log(
+                        '📡 GET /api/status - 처리 상태 확인'
+                    );
+                    showResult(data);
+                }, 50);
+            }, 50);
+        }
+
+        function showResult(data) {
+            document.getElementById('form-page').style.display =
+                'none';
+            document.getElementById('result-page').style.display =
+                'block';
+
+            // 결과 데이터 표시
+            const resultDiv = document.getElementById('form-data');
+            resultDiv.innerHTML = `
+                <h3>제출된 정보:</h3>
+                <p><strong>이름:</strong> ${data.name}</p>
+                <p><strong>생년월일:</strong> ${data.birth}</p>
+                <p><strong>연락처:</strong> ${data.phone}</p>
+                <p><strong>개인정보 동의:</strong> ${data.agree1 ? '동의' : '미동의'}</p>
+                <p><strong>약관 동의:</strong> ${data.agree2 ? '동의' : '미동의'}</p>
+                <p><strong>제출 시간:</strong> ${data.timestamp}</p>
+            `;
+
+            window.history.pushState({}, '', '?page=result');
+            console.log('✅ 신청 완료!');
+        }
+
+        // 페이지 로드 시 URL 파라미터 확인
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window
+                .location.search);
+            const page = urlParams.get('page');
+
+            if (page === 'form') {
+                showForm();
+            } else if (page === 'result') {
+                document.getElementById('main-page').style
+                    .display = 'none';
+                document.getElementById('result-page').style
+                    .display = 'block';
+            }
+        });
+
+        // 네트워크 요청 모니터링을 위한 이벤트
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🌐 페이지 로드 완료 - 네트워크 모니터링 시작 가능');
+        });
+    </script>
+</body>
+
+</html>
