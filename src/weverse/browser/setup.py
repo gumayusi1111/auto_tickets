@@ -272,3 +272,86 @@ def download_chromedriver_manually():
     print("6. 在终端运行: chmod +x ./chromedriver")
     print("7. 重新运行程序")
     print("=" * 50)
+
+
+def click_element_with_fallback(driver, selector, fallback_text=None, timeout=5):
+    """
+    使用多种策略点击元素
+    
+    Args:
+        driver: WebDriver实例
+        selector: CSS选择器
+        fallback_text: 备用文本（用于按文本查找）
+        timeout: 超时时间
+    
+    Returns:
+        bool: 是否点击成功
+    """
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
+    
+    wait = WebDriverWait(driver, timeout)
+    
+    try:
+        # 策略1: 使用CSS选择器
+        try:
+            element = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
+            element.click()
+            print(f"✅ 使用CSS选择器成功点击: {selector}")
+            return True
+        except (TimeoutException, ElementClickInterceptedException):
+            print(f"⚠️ CSS选择器点击失败: {selector}")
+        
+        # 策略2: 如果有备用文本，使用文本查找
+        if fallback_text:
+            try:
+                # 尝试查找包含文本的按钮或链接
+                xpath_expressions = [
+                    f"//button[contains(text(), '{fallback_text}')]",
+                    f"//a[contains(text(), '{fallback_text}')]",
+                    f"//input[@value='{fallback_text}']",
+                    f"//*[contains(text(), '{fallback_text}')]"
+                ]
+                
+                for xpath in xpath_expressions:
+                    try:
+                        element = driver.find_element(By.XPATH, xpath)
+                        if element.is_displayed() and element.is_enabled():
+                            element.click()
+                            print(f"✅ 使用文本查找成功点击: {fallback_text}")
+                            return True
+                    except:
+                        continue
+            except Exception as text_error:
+                print(f"⚠️ 文本查找点击失败: {text_error}")
+        
+        # 策略3: JavaScript点击
+        try:
+            element = driver.find_element(By.CSS_SELECTOR, selector)
+            driver.execute_script("arguments[0].click();", element)
+            print(f"✅ 使用JavaScript成功点击: {selector}")
+            return True
+        except Exception as js_error:
+            print(f"⚠️ JavaScript点击失败: {js_error}")
+        
+        # 策略4: 强制点击（忽略遮挡）
+        try:
+            element = driver.find_element(By.CSS_SELECTOR, selector)
+            driver.execute_script("""
+                arguments[0].style.visibility = 'visible';
+                arguments[0].style.display = 'block';
+                arguments[0].click();
+            """, element)
+            print(f"✅ 使用强制点击成功: {selector}")
+            return True
+        except Exception as force_error:
+            print(f"⚠️ 强制点击失败: {force_error}")
+        
+        print(f"❌ 所有点击策略都失败: {selector}")
+        return False
+        
+    except Exception as e:
+        print(f"❌ 点击元素失败: {e}")
+        return False

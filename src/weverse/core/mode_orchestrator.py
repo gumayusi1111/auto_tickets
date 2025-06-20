@@ -117,7 +117,7 @@ class ModeOrchestrator:
         network_monitor = self.browser_manager.get_network_monitor()
         
         self.content_analyzer = ContentAnalyzer(driver, wait)
-        self.application_executor = ApplicationExecutor(driver, wait, network_monitor)
+        self.application_executor = ApplicationExecutor(driver)
         self.monitoring_handler = MonitoringHandler(driver, network_monitor)
         
         print("✅ 浏览器和网络设置完成")

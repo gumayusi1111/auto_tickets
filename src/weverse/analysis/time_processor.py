@@ -14,6 +14,14 @@ import statistics
 import requests
 from concurrent.futures import ThreadPoolExecutor
 
+# 导入延迟配置
+try:
+    from config.latency_config import get_latency_config, get_optimized_preclick_ms
+    LATENCY_CONFIG_AVAILABLE = True
+except ImportError:
+    LATENCY_CONFIG_AVAILABLE = False
+    print("⚠️ 延迟配置文件不可用，使用默认值")
+
 # 导入新的VPN优化器
 try:
     from ..vpn.shanghai_korea_optimizer import ShanghaiKoreaOptimizer
@@ -209,30 +217,91 @@ def show_countdown_with_dynamic_timing(target_time: datetime, enable_latency_tes
     recommended_advance_ms = 300  # 默认300ms
     
     if time_diff > 35 and enable_latency_test:
-        if VPN_OPTIMIZER_AVAILABLE:
-            # 使用新的上海-韩国VPN优化器
-            print("🚀 启用上海-韩国VPN延迟优化...")
+        # 获取延迟配置
+        if LATENCY_CONFIG_AVAILABLE:
+            latency_config = get_latency_config()
+            scenario = latency_config.get('scenario', 'internal')
+            
+            # 根据场景选择基础延迟
+            if scenario == 'external':
+                base_latency_ms = latency_config['external_request']['base_latency_ms']
+                scenario_desc = "外部请求（Postman场景）"
+            else:
+                base_latency_ms = latency_config['internal_navigation']['base_latency_ms']
+                scenario_desc = "页面内跳转（推荐）"
+                
+            browser_overhead_ms = latency_config['browser_overhead_ms']
+            safety_margin_ms = latency_config['safety_margin_ms']
+            dynamic_adjustment = latency_config['dynamic_adjustment']
+        else:
+            base_latency_ms = 300  # 默认使用页面内跳转值
+            browser_overhead_ms = 80
+            safety_margin_ms = 100
+            scenario_desc = "页面内跳转（默认）"
+            dynamic_adjustment = {'enabled': True, 'weight_measured': 0.7, 'weight_realtime': 0.3, 'max_deviation_ms': 200}
+        
+        # 新增：基于用户Postman测试数据的优化计算
+        print("🎯 开始优化延迟计算...")
+        print(f"📊 场景: {scenario_desc}")
+        print("💡 说明: 页面内跳转通常比外部请求快，因为：")
+        print("   - 复用已有的TCP/HTTPS连接")
+        print("   - 可能使用浏览器缓存")
+        print("   - 无需重新进行DNS解析")
+        print(f"\n📈 延迟计算参数：")
+        print(f"   - 基础网络延迟: {base_latency_ms}ms")
+        print(f"   - 浏览器额外开销: {browser_overhead_ms}ms")
+        
+        # 计算总延迟
+        total_latency_ms = base_latency_ms + browser_overhead_ms + safety_margin_ms
+        
+        print(f"\n📊 延迟计算明细：")
+        print(f"   基础网络延迟: {base_latency_ms}ms ({scenario_desc})")
+        print(f"   浏览器开销: {browser_overhead_ms}ms")
+        print(f"   安全边际: {safety_margin_ms}ms")
+        print(f"   总提前时间: {total_latency_ms}ms")
+        
+        # 如果启用了动态检测，进行补充验证
+        if VPN_OPTIMIZER_AVAILABLE and dynamic_adjustment['enabled']:
             try:
+                print("\n🔄 进行实时网络验证...")
                 optimizer = ShanghaiKoreaOptimizer()
-                optimizer.test_duration = min(30, int(time_diff - 5))  # 确保有足够时间
+                optimizer.test_duration = min(10, int(time_diff - 5))  # 快速验证
                 
-                # 检测真实延迟并计算最优提前时间
+                # 快速检测当前延迟
                 latency_data = optimizer.detect_real_latency()
-                preclick_data = optimizer.calculate_optimal_preclick_time(latency_data)
+                current_avg_ms = latency_data['avg_latency_ms']
                 
-                recommended_advance_ms = preclick_data['recommended_preclick_ms']
+                print(f"✅ 实时检测延迟: {current_avg_ms:.1f}ms")
                 
-                print(f"🎯 VPN优化结果: 延迟{latency_data['avg_latency_ms']:.1f}ms, 提前{recommended_advance_ms:.1f}ms")
+                # 如果实时检测值与预设值差异较大，进行调整
+                if abs(current_avg_ms - base_latency_ms) > dynamic_adjustment['max_deviation_ms']:
+                    print(f"⚠️ 检测到网络波动较大，动态调整...")
+                    # 使用加权平均
+                    adjusted_latency = (base_latency_ms * dynamic_adjustment['weight_measured'] + 
+                                      current_avg_ms * dynamic_adjustment['weight_realtime'])
+                    total_latency_ms = adjusted_latency + browser_overhead_ms + safety_margin_ms
+                    print(f"📊 调整后提前时间: {total_latency_ms:.0f}ms")
                 
             except Exception as e:
-                print(f"⚠️ VPN优化器失败，使用传统检测: {e}")
-                # 回退到传统方法
-                latency_stats = test_real_network_latency(30)
-                recommended_advance_ms = latency_stats['recommended_advance_ms']
+                print(f"⚠️ 实时验证失败，使用预设值: {e}")
+        
+        # 确保在合理范围内
+        if LATENCY_CONFIG_AVAILABLE:
+            limits = latency_config['limits']
+            recommended_advance_ms = max(limits['min_ms'], min(limits['max_ms'], total_latency_ms))
         else:
-            # 使用传统延迟检测
-            latency_stats = test_real_network_latency(30)
-            recommended_advance_ms = latency_stats['recommended_advance_ms']
+            recommended_advance_ms = max(500, min(1200, total_latency_ms))
+        
+        print(f"\n✅ 最终提前时间: {recommended_advance_ms:.0f}ms")
+        print("💡 说明: 基于实测延迟 + 浏览器开销 + 安全边际")
+        
+    else:
+        # 时间太短，使用固定的优化值
+        if LATENCY_CONFIG_AVAILABLE:
+            recommended_advance_ms = get_optimized_preclick_ms('internal')  # 使用页面内跳转场景
+        else:
+            recommended_advance_ms = 480  # 300 + 80 + 100（页面内跳转）
+        print(f"⏰ 使用优化预设值: {recommended_advance_ms}ms (页面内跳转场景)")
     
     recommended_advance_s = recommended_advance_ms / 1000.0
     

@@ -45,6 +45,10 @@ class EnhancedNetworkMonitor:
         
         return self.captured_requests.copy()
     
+    def get_captured_requests(self) -> List[Dict[str, Any]]:
+        """获取已捕获的请求（不停止监控）"""
+        return self.captured_requests.copy()
+    
     def capture_post_submit_requests(self, duration: float = 10.0) -> Dict[str, Any]:
         """
         捕获提交后的所有网络请求
@@ -203,11 +207,24 @@ class EnhancedNetworkMonitor:
         """网络监控主循环"""
         while self.monitoring:
             try:
-                # 这里可以添加实时网络监控逻辑
+                # 获取性能日志
+                logs = self.driver.get_log('performance')
+                
+                for log in logs:
+                    try:
+                        message = json.loads(log['message'])
+                        if message['message']['method'] in ['Network.responseReceived', 'Network.requestWillBeSent']:
+                            request_data = self._extract_request_info(message, log['timestamp'])
+                            if request_data:
+                                self.captured_requests.append(request_data)
+                    except:
+                        continue
+                
                 time.sleep(0.1)
             except Exception as e:
-                print(f"⚠️ 网络监控异常: {e}")
-                break
+                # 静默处理错误，避免刷屏
+                time.sleep(0.5)
+                continue
 
 def capture_all_post_submit_requests(driver, duration: float = 10.0) -> Dict[str, Any]:
     """

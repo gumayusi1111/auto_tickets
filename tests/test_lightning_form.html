@@ -65,25 +65,57 @@
             box-sizing: border-box;
         }
 
-        .checkbox-group {
+        /* Weverse复选框样式 */
+        .sc-jJEKmz.hKDpP {
             margin: 20px 0;
         }
 
-        .checkbox-item {
-            display: flex;
-            align-items: center;
+        .sc-fWPcWZ.hNoznW {
+            position: relative;
             margin: 10px 0;
             padding: 10px;
             background-color: #f9f9f9;
             border-radius: 5px;
         }
 
-        .checkbox-item input[type="checkbox"] {
-            margin-right: 10px;
-            transform: scale(1.2);
+        .sc-fWPcWZ.hNoznW label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 0;
         }
 
-        .submit-button {
+        .sc-fWPcWZ.hNoznW input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .sc-khAkCZ.sc-hTZgZg.ewSqYc.fpLDWJ {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .sc-khAkCZ svg {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 3px;
+            display: block;
+            background: white;
+        }
+
+        .sc-fWPcWZ.hNoznW input[type="checkbox"]:checked~.sc-khAkCZ svg {
+            background-color: #00c73c;
+            border-color: #00c73c;
+        }
+
+        .sc-fWPcWZ.hNoznW input[type="checkbox"]:checked~.sc-khAkCZ svg path {
+            stroke: white;
+        }
+
+        /* 提交按钮样式 */
+        input[type="submit"] {
             width: 100%;
             padding: 15px;
             font-size: 18px;
@@ -95,7 +127,7 @@
             margin-top: 20px;
         }
 
-        .submit-button:hover {
+        input[type="submit"]:hover {
             background-color: #00b33a;
         }
 
@@ -129,52 +161,124 @@
             </button>
         </div>
 
-        <!-- 표단 페이지 -->
+        <!-- 表单页面 - 使用Weverse的结构 -->
         <div id="form-page" class="form-container">
-            <h1 class="title">참여 신청서</h1>
-            <div class="info">
-                📝 모든 필수 정보를 입력해주세요.
+            <div id="root">
+                <div>
+                    <div>
+                        <div>
+                            <h1 class="title">참여 신청서</h1>
+                            <div class="info">
+                                📝 모든 필수 정보를 입력해주세요.
+                            </div>
+
+                            <form id="application-form"
+                                onsubmit="submitForm(event)">
+                                <div class="form-group">
+                                    <label for="name">이름 *</label>
+                                    <input type="text" id="name"
+                                        name="name"
+                                        value="홍길동" readonly>
+                                </div>
+
+                                <div class="form-group">
+                                    <label
+                                        for="requiredProperties-birthDate">생년월일
+                                        * (YYYYMMDD)</label>
+                                    <input type="text"
+                                        id="requiredProperties-birthDate"
+                                        name="birthDate"
+                                        placeholder="생년월일을 입력하세요 (예: 19900101)"
+                                        maxlength="8" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label
+                                        for="requiredProperties-phoneNumber">연락처</label>
+                                    <input type="tel"
+                                        id="requiredProperties-phoneNumber"
+                                        name="phoneNumber"
+                                        placeholder="01012345678"
+                                        maxlength="11">
+                                </div>
+
+                                <!-- 복选框 섹션 - Weverse 구조 -->
+                                <section class="sc-jJEKmz hKDpP">
+                                    <div>
+                                        <div>
+                                            <!-- 첫 번째 체크박스 -->
+                                            <div>
+                                                <div>
+                                                    <div
+                                                        class="sc-fWPcWZ hNoznW">
+                                                        <label>
+                                                            <input
+                                                                type="checkbox"
+                                                                name="agree1"
+                                                                required>
+                                                            <span
+                                                                class="sc-khAkCZ sc-hTZgZg ewSqYc fpLDWJ">
+                                                                <svg viewBox="0 0 24 24"
+                                                                    fill="none">
+                                                                    <path
+                                                                        d="M5 12l5 5L20 7"
+                                                                        stroke="currentColor"
+                                                                        stroke-width="3"
+                                                                        stroke-linecap="round"
+                                                                        stroke-linejoin="round" />
+                                                                </svg>
+                                                            </span>
+                                                            개인정보 수집 및
+                                                            이용에 동의합니다.
+                                                            (필수)
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 두 번째 체크박스 -->
+                                            <div>
+                                                <div>
+                                                    <div
+                                                        class="sc-fWPcWZ hNoznW">
+                                                        <label>
+                                                            <input
+                                                                type="checkbox"
+                                                                name="agree2"
+                                                                required>
+                                                            <span
+                                                                class="sc-khAkCZ sc-hTZgZg ewSqYc fpLDWJ">
+                                                                <svg viewBox="0 0 24 24"
+                                                                    fill="none">
+                                                                    <path
+                                                                        d="M5 12l5 5L20 7"
+                                                                        stroke="currentColor"
+                                                                        stroke-width="3"
+                                                                        stroke-linecap="round"
+                                                                        stroke-linejoin="round" />
+                                                                </svg>
+                                                            </span>
+                                                            이벤트 참여 약관에
+                                                            동의합니다.
+                                                            (필수)
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- 제출 버튼 - Weverse 구조 -->
+                                <div>
+                                    <input type="submit"
+                                        value="참여 신청">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <form id="application-form" onsubmit="submitForm(event)">
-                <div class="form-group">
-                    <label for="name">이름 *</label>
-                    <input type="text" id="name" name="name"
-                        value="홍길동" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label for="birth">생년월일 * (YYYYMMDD)</label>
-                    <input type="text" id="birth" name="birth"
-                        placeholder="생년월일을 입력하세요 (예: 19900101)"
-                        maxlength="8" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">연락처</label>
-                    <input type="tel" id="phone" name="phone"
-                        value="010-1234-5678" readonly>
-                </div>
-
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="agree1"
-                            name="agree1" required>
-                        <label for="agree1">개인정보 수집 및 이용에 동의합니다.
-                            (필수)</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="agree2"
-                            name="agree2" required>
-                        <label for="agree2">이벤트 참여 약관에 동의합니다.
-                            (필수)</label>
-                    </div>
-                </div>
-
-                <button type="submit" class="submit-button">
-                    참여 신청
-                </button>
-            </form>
         </div>
 
         <!-- 결과 페이지 -->
@@ -189,8 +293,12 @@
     </div>
 
     <script>
+        // 성능 측정
+        window.formFillStartTime = null;
+        window.formFillEndTime = null;
+
         function showForm() {
-            console.log('🔄 표단 페이지로 이동 중...');
+            console.log('🔄 표单 페이지로 이동 중...');
             document.getElementById('main-page').style.display =
                 'none';
             document.getElementById('form-page').style.display =
@@ -202,7 +310,7 @@
             // 표단이 로드되었음을 알리는 이벤트
             setTimeout(() => {
                 console.log('✅ 표단 페이지 로드 완료');
-                // 표단 로드 완료 이벤트 발생
+                window.formFillStartTime = performance.now();
                 document.dispatchEvent(new CustomEvent(
                     'formPageLoaded'));
             }, 100);
@@ -211,14 +319,18 @@
         function submitForm(event) {
             event.preventDefault();
 
+            if (window.formFillStartTime && !window.formFillEndTime) {
+                window.formFillEndTime = performance.now();
+            }
+
             console.log('🚀 표단 제출 시작...');
 
             // 표단 데이터 수집
             const formData = new FormData(event.target);
             const data = {
                 name: formData.get('name'),
-                birth: formData.get('birth'),
-                phone: formData.get('phone'),
+                birthDate: formData.get('birthDate'),
+                phoneNumber: formData.get('phoneNumber'),
                 agree1: formData.get('agree1') ? true : false,
                 agree2: formData.get('agree2') ? true : false,
                 timestamp: new Date().toISOString()
@@ -228,11 +340,8 @@
 
             // 가짜 API 요청 시뮬레이션
             setTimeout(() => {
-                // POST 요청 시뮬레이션
                 console.log(
                     '📡 POST /api/submit - 신청 데이터 전송');
-
-                // GET 요청 시뮬레이션
                 setTimeout(() => {
                     console.log(
                         '📡 GET /api/status - 처리 상태 확인'
@@ -248,16 +357,23 @@
             document.getElementById('result-page').style.display =
                 'block';
 
+            // 성능 시간 계산
+            const fillTime = window.formFillEndTime ?
+                (window.formFillEndTime - window.formFillStartTime)
+                .toFixed(2) : 'N/A';
+
             // 결과 데이터 표시
             const resultDiv = document.getElementById('form-data');
             resultDiv.innerHTML = `
                 <h3>제출된 정보:</h3>
                 <p><strong>이름:</strong> ${data.name}</p>
-                <p><strong>생년월일:</strong> ${data.birth}</p>
-                <p><strong>연락처:</strong> ${data.phone}</p>
+                <p><strong>생년월일:</strong> ${data.birthDate}</p>
+                <p><strong>연락처:</strong> ${data.phoneNumber || '미입력'}</p>
                 <p><strong>개인정보 동의:</strong> ${data.agree1 ? '동의' : '미동의'}</p>
                 <p><strong>약관 동의:</strong> ${data.agree2 ? '동의' : '미동의'}</p>
                 <p><strong>제출 시간:</strong> ${data.timestamp}</p>
+                <hr>
+                <p><strong>폼 채우기 시간:</strong> ${fillTime}ms</p>
             `;
 
             window.history.pushState({}, '', '?page=result');
@@ -280,9 +396,36 @@
             }
         });
 
-        // 네트워크 요청 모니터링을 위한 이벤트
+        // 복选框 클릭 처리 - SVG나 label 클릭시에도 작동
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🌐 페이지 로드 완료 - 네트워크 모니터링 시작 가능');
+
+            // 복选框 클릭 이벤트
+            document.querySelectorAll('.sc-fWPcWZ.hNoznW')
+                .forEach(wrapper => {
+                    wrapper.addEventListener('click',
+                        function (e) {
+                            if (e.target.tagName !==
+                                'INPUT') {
+                                const checkbox = this
+                                    .querySelector(
+                                        'input[type="checkbox"]'
+                                    );
+                                if (checkbox) {
+                                    checkbox
+                                        .checked = !
+                                        checkbox
+                                        .checked;
+                                    checkbox
+                                        .dispatchEvent(
+                                            new Event(
+                                                'change', {
+                                                    bubbles: true
+                                                }));
+                                }
+                            }
+                        });
+                });
         });
     </script>
 </body>
